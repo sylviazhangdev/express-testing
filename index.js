@@ -8,8 +8,17 @@ const express = require('express');
 const app = express();
 const port = 3000;
 
+// Enable  built-in JSON parsing middleware
+// Middleware in Express, is automatically applied to requests
+// Automatically parsed/translates incoming JSON data
+app.use(express.json())
+
 //Require Mongoose package
 const mongoose = require('mongoose');
+const Country = require('./models/Country');
+
+// Include Mongoose models
+require("./models/Country");
 
 // GET /
 app.get('/', (req, res) => {
@@ -81,6 +90,41 @@ app.get('/countries/:code', (req, res) => {
 
 
 
+
+/**
+ * Country endpoints (MongoDB) 
+*/
+// GET /api/countries
+app.get('/api/countries', async (req, res) => {
+
+    // find all countries with projection and sorting
+    // return  plain old JavaScript objects (POJOs) instead of heavy Mongoose Document objects
+    const countries = await Country.find()
+        .select({_id:0})
+        .sort({code:-1})
+        .lean();
+
+    // send response
+    res.status(200).send(countries);
+});
+
+// POST /api/countries
+app.get('/api/countries', async (req, res) => {
+
+   // TODO: validation...
+
+   // Build a new object 
+   const country = new Country({
+    code:req.body.code,
+    name:req.body.name,
+   });
+
+   // Add/Save to the database
+   country.save();
+
+   // Send response(201 = Created)
+    res.status(201).send(country);
+});
 
 
 async function main() {
