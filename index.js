@@ -127,6 +127,29 @@ app.get('/api/countries', async (req, res) => {
 });
 
 
+// GET /countries/:code
+// This endpoint/route takes a named parameter, which is uesd inside the handler
+app.get('/api/countries/:code', async (req, res) => {
+
+    // Define an object that will be sent as JSON
+    const countryCode = req.params.code;
+
+    // find one country
+    // return  plain old JavaScript objects (POJOs) instead of heavy Mongoose Document objects
+    const country = await Country.findOne({code:countryCode})
+        .select({_id:0})
+        .lean();
+
+    // check if country found
+    if (country == null) {
+
+        return res.status(404).send({message: "Country not found"});
+    }
+
+    // send response
+    res.status(200).send(country);
+});
+
 async function main() {
 
     // Connect to MongoDB instance/database
